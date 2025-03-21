@@ -34,6 +34,7 @@ export interface FormResponse {
   respondent: string; // Wallet address
   respondentENS: string | null;
   submittedAt: number;
+  signature: string;
   answers: {
     questionId: string;
     value: string | string[];

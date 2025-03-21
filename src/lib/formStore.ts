@@ -2,7 +2,7 @@
 // In a real implementation, this would be stored encrypted and distributed
 
 import { FormType, FormResponse, FormCreationParams, FormSubmissionParams, StoredForm, StoredFormType } from '@/types/form';
-import { checkNFTOwnership, getConnectedWallet, getENS } from './wallet';
+import { checkNFTOwnership, formatMessageToSign, getConnectedWallet, getENS, recoverAddress } from './wallet';
 import { FORM_CONFIG } from '@/config/form';
 import { sha256 } from 'ethers';
 import { bytesToUtf8, utf8ToBytes} from "@waku/sdk"
@@ -100,6 +100,18 @@ export const submitResponse = async (response: FormSubmissionParams): Promise<Fo
 
   if (!response.respondent) {
     throw new Error('Respondent address is required');
+  }
+
+  if (forms[formIndex].whitelist.type !== 'none') {
+    if (!response.signature  || response.signature.length == 0) {
+      throw new Error("Missing signature")
+    }
+
+    const recoveredAddress = recoverAddress(formatMessageToSign(response.formId, response.respondent, response.submittedAt), response.signature)
+
+    if (response.respondent.toLowerCase() != recoveredAddress.toLowerCase()) {
+      throw new Error('Respondent does not match the signature')
+    }
   }
 
   if(!await canAccessFormById(response.formId, response.respondent)) {

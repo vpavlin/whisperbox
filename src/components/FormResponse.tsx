@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Send, Lock, AlertTriangle, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { FormSubmissionParams, FormType } from '@/types/form';
-import { getConnectedWallet, signMessage } from '@/lib/wallet';
+import { formatMessageToSign, getConnectedWallet, signMessage } from '@/lib/wallet';
 import { loadResponse, submitAndPersistResponse, submitResponse, toHexString } from '@/lib/formStore';
 import { useWakuContext } from '@/hooks/useWaku';
 import { randomBytes } from 'ethers';
@@ -117,10 +117,13 @@ const FormResponse: React.FC<FormResponseProps> = ({ form, onSubmitted }) => {
         questionId,
         value,
       }));
+
+      const now = Date.now()
+      let signature = ""
       
       // For non-public forms, sign message for authentication
       if (form.whitelist.type !== 'none') {
-        await signMessage("Submit form response");
+        signature = await signMessage(formatMessageToSign(form.id, walletAddress, now));
       }
       
       // Submit the response with the wallet address
@@ -128,7 +131,8 @@ const FormResponse: React.FC<FormResponseProps> = ({ form, onSubmitted }) => {
         formId: form.id,
         respondent: walletAddress,
         answers: formattedAnswers,
-        submittedAt: Date.now(),
+        submittedAt: now,
+        signature: signature,
         confirmationId: toHexString(randomBytes(32)),
       });
       
