@@ -51,11 +51,12 @@ export class WakuClient extends EventEmitter {
             return
         }
         this.state = ClientState.INITIALIZING
+        console.log("WakuClient: Initializing")
         this.emit(ClientEvents.STATE_UPDATE, this.state)
 
         try {
-            await this.node!.waitForPeers([Protocols.Filter, Protocols.LightPush, Protocols.Store]);
             if(!this.dispatcher) {
+                console.log("Getting dispatcher")
                 const disp = await getDispatcher(this.node!, CONTENT_TOPIC, "whisperbox", false, false)
                 if (!disp) {
                     throw new Error("Failed to initialize Waku Dispatcher")
@@ -66,19 +67,25 @@ export class WakuClient extends EventEmitter {
 
                 this.state = ClientState.INITIALIZED
                 this.emit(ClientEvents.STATE_UPDATE, this.state)
+                console.log("WakuClient", disp)
 
 
             }
             if (!this.dispatcher) {
                 this.state = ClientState.FAILED
                 this.emit(ClientEvents.STATE_UPDATE, this.state)
+                console.log("Dispatcher failed to initialize")
 
                 return
             }
 
+
             this.dispatcher.on(MessageTypes.NEW_FORM, this.handleNewForm.bind(this))
             this.dispatcher.on(MessageTypes.FORM_RESPONSE, this.handleResponse.bind(this))
             this.dispatcher.on(MessageTypes.CONFIRMATION_RESPONSE, this.handleConfirmation.bind(this))
+
+            console.log("WakuClient: Dispatcher initialized")
+
 
             await this.dispatcher.start()
             try {

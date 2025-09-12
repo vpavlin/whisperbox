@@ -17,6 +17,14 @@ interface Props {
     children: React.ReactNode
 }
 
+export const useWaku = () => {
+    const context = React.useContext(WakuContext);
+    if (!context) {
+        throw new Error('useWaku must be used within a WakuContextProvider');
+    }
+    return context.providerInfo;
+};
+
 export const WakuContextProvider = ({ children, updateStatus }: Props) => {
     const [status, setStatus] = useState<string>("disconnected")
     const [connected, setConnected] = useState<boolean>(false)
@@ -25,11 +33,13 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
     const [health, setHealth] = useState<HealthStatus>(HealthStatus.Unhealthy)
     const [ client, setClient ] = useState<WakuClient | undefined>(undefined)
     const address = walletService.getConnectedWallet();
+    const [counter, setCounter] = useState(0);
 
     useEffect(() => {
         console.log("WakuContextProvider: address changed", address);
         const connectToWaku = async () => {
             if (connected || connecting || node ) return;
+            setCounter(c => c+1)
             
             try {
                 setConnecting(true);
@@ -43,6 +53,7 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
                 
                 // Return early if node is already set (race condition protection)
                 if (node) return;
+                await ln.start();
                 
                 setNode(ln);
                 setStatus("connecting");
@@ -62,24 +73,27 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
                 
                 const c = new WakuClient(ln);
                 setClient(c);
+                console.log("Initializing Dispatcher")
                 await c.init();
 
-                ln.events.addEventListener("waku:health", (hs) => {
+                ln.events.addEventListener("waku:health", async (hs) => {
+                    console.log("Health status changed:", hs.detail, new Date());
+                    console.log(await ln.libp2p.peerStore.all());
                     setHealth(hs.detail);
                     switch(hs.detail) {
                         case HealthStatus.MinimallyHealthy || HealthStatus.SufficientlyHealthy:
                             updateStatus("Waku node is healthy", "success", 3000);
-                            setConnected(true);
+                            //setConnected(true);
                             break;
                         case HealthStatus.Unhealthy:
                             updateStatus("Waku node is unhealthy", "warning", 3000);
-                            setConnected(false);
+                            //setConnected(false);
                             break;
                     }
                 });
+
+                setConnected(true)
                 
-                setStatus("connected");
-                setConnected(true);
             } catch (error) {
                 console.error("Failed to connect to Waku:", error);
                 setStatus("error");
@@ -96,6 +110,10 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
         console.log("Waku client and address available");
         client.setAddress(address);
     }, [client, address]);
+
+    useEffect(() => {
+        console.log("Counter value:     ",counter)
+    }, [counter])
 
     const stop = useCallback(() => {
         node?.stop()

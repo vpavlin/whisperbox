@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import WalletConnect from './WalletConnect';
-import { ChevronRight, Moon, Sun } from 'lucide-react';
+import { ChevronRight, Moon, Sun, Circle } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import WakuStatusIcon from './WakuStatusIcon';
 
 const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -74,6 +75,7 @@ const Navbar: React.FC = () => {
           >
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
+          <WakuStatusIcon />
           <WalletConnect />
         </div>
       </div>
