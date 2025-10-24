@@ -1,3 +1,4 @@
+'use client';
 import EventEmitter from "events"
 import getDispatcher, { Dispatcher} from "waku-dispatcher"
 import { bytesToUtf8,  IWaku, LightNode, Protocols, SDKProtocolResult, utf8ToBytes,  } from "@waku/sdk";

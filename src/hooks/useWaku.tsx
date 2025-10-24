@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
     createLightNode,
@@ -68,13 +69,7 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
                 
                 
                 console.log(ln)
-                
-                
-                const c = new WakuClient(ln);
-                setClient(c);
-                console.log("Initializing Dispatcher")
-                await c.init();
-
+      
                 ln.events.addEventListener(WakuEvent.Health, async (hs) => {
                     console.log("Health status changed:", hs.detail, new Date());
                     console.log(await ln.getConnectedPeers());
@@ -90,6 +85,13 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
                             break;
                     }
                 });
+                
+                const c = new WakuClient(ln);
+                setClient(c);
+                console.log("Initializing Dispatcher")
+                await c.init();
+
+
 
                 setConnected(true)
                 
