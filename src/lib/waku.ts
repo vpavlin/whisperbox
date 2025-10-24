@@ -89,7 +89,7 @@ export class WakuClient extends EventEmitter {
 
             await this.dispatcher.start()
             try {
-                await this.node!.waitForPeers([Protocols.Store]);
+                //await this.node!.waitForPeers([Protocols.Store]);
 
                 console.log("Dispatching local query")
                 await this.dispatcher.dispatchLocalQuery()
