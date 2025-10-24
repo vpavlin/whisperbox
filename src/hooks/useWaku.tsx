@@ -5,8 +5,7 @@ import {
   } from "@waku/sdk";
 import {
     HealthStatus,
-    HealthStatusChangeEvents,
-    Protocols
+    WakuEvent,
 } from "@waku/interfaces"
 import { WakuClient } from "@/lib/waku";
 import { walletService } from "@/lib/wallet";
@@ -76,7 +75,7 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
                 console.log("Initializing Dispatcher")
                 await c.init();
 
-                ln.events.addEventListener("waku:health", async (hs) => {
+                ln.events.addEventListener(WakuEvent.Health, async (hs) => {
                     console.log("Health status changed:", hs.detail, new Date());
                     console.log(await ln.getConnectedPeers());
                     setHealth(hs.detail);
