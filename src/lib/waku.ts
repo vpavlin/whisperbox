@@ -85,7 +85,7 @@ export class WakuClient extends EventEmitter {
             this.dispatcher.on(MessageTypes.CONFIRMATION_RESPONSE, this.handleConfirmation.bind(this))
 
             console.log("WakuClient: Dispatcher initialized")
-
+            console.log(this.node)
 
             await this.dispatcher.start()
             try {

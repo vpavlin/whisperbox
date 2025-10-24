@@ -78,7 +78,7 @@ export const WakuContextProvider = ({ children, updateStatus }: Props) => {
 
                 ln.events.addEventListener("waku:health", async (hs) => {
                     console.log("Health status changed:", hs.detail, new Date());
-                    console.log(await ln.libp2p.peerStore.all());
+                    console.log(await ln.getConnectedPeers());
                     setHealth(hs.detail);
                     switch(hs.detail) {
                         case HealthStatus.MinimallyHealthy || HealthStatus.SufficientlyHealthy:
